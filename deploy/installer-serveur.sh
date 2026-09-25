@@ -44,10 +44,10 @@ echo "== 1. Vérifications (PHP utilisé : $PHP)"
 "$PHP" -r 'exit(version_compare(PHP_VERSION, "8.3.0", ">=") ? 0 : 1);' \
     || { echo "PHP 8.3 ou plus est requis (trouvé : $("$PHP" -r 'echo PHP_VERSION;')). Voir docs/DEPLOIEMENT.md."; exit 1; }
 MANQUANTES=""
-for ext in pdo_mysql mbstring xml ctype fileinfo gd intl zip bcmath curl openssl tokenizer dom; do
+for ext in pdo_mysql mbstring xml ctype fileinfo gd intl zip curl openssl tokenizer dom; do
     "$PHP" -m | grep -qi "^$ext$" || MANQUANTES="$MANQUANTES $ext"
 done
-[ -z "$MANQUANTES" ] || { echo "Extensions PHP manquantes :$MANQUANTES (ex. sudo apt install $PHP-{mysql,mbstring,xml,gd,intl,zip,bcmath,curl})"; exit 1; }
+[ -z "$MANQUANTES" ] || { echo "Extensions PHP manquantes :$MANQUANTES (ex. sudo apt install $PHP-{mysql,mbstring,xml,gd,intl,zip,curl})"; exit 1; }
 command -v composer >/dev/null || { echo "Composer est requis (https://getcomposer.org/download/)."; exit 1; }
 command -v mysql >/dev/null || { echo "Client MySQL introuvable."; exit 1; }
 $MYSQL_CMD -e "SELECT 1" >/dev/null 2>&1 || { echo "Connexion administrateur MySQL impossible avec « $MYSQL_CMD ». Relancez avec MYSQL_CMD=\"mysql -uroot -p\"."; exit 1; }

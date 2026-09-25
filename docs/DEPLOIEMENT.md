@@ -34,7 +34,7 @@ sudo nginx -v || apache2 -v
 ls /var/www/
 ```
 
-- **PHP 8.3 ou plus** avec les extensions `mysql, mbstring, xml, gd, intl, zip, bcmath, curl`. Plusieurs versions peuvent coexister (VPS de la mairie : PHP 8.2 par défaut et **PHP 8.4**) : les scripts choisissent automatiquement `php8.4` (ou `php8.3`) sans changer le `php` par défaut, et chaque site Nginx garde son propre PHP-FPM. Les autres applications ne sont pas touchées.
+- **PHP 8.3 ou plus** avec les extensions `mysql, mbstring, xml, gd, intl, zip, curl`. Plusieurs versions peuvent coexister (VPS de la mairie : PHP 8.2 par défaut et **PHP 8.4**) : les scripts choisissent automatiquement `php8.4` (ou `php8.3`) sans changer le `php` par défaut, et chaque site Nginx garde son propre PHP-FPM. Les autres applications ne sont pas touchées.
 - **Composer 2**, **MySQL / MariaDB**, **certbot** (HTTPS Let's Encrypt).
 
 ## 1. DNS
