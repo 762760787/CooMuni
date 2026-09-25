@@ -1,0 +1,137 @@
+@import 'tailwindcss';
+
+@source '../../app/**/*.php';
+@source '../views/**/*.blade.php';
+
+/* Identité visuelle : vert et or du blason de la Mairie de Ngoundiane. */
+@theme {
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+
+    --color-primaire-50: #f0f8f1;
+    --color-primaire-100: #dcefdf;
+    --color-primaire-200: #bbdfc2;
+    --color-primaire-300: #8ec79b;
+    --color-primaire-400: #5daa70;
+    --color-primaire-500: #3a8e50;
+    --color-primaire-600: #2a743e;
+    --color-primaire-700: #1f6f3a;
+    --color-primaire-800: #1b4b2b;
+    --color-primaire-900: #163e24;
+    --color-primaire-950: #0b2314;
+
+    --color-or-100: #fdf3d3;
+    --color-or-300: #f6d56b;
+    --color-or-400: #f2c230;
+    --color-or-500: #dca70f;
+    --color-or-600: #b7860a;
+
+    --color-fond: #f4f7f2;
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+        /* Respecte la taille de police système du smartphone (§22). */
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        @apply bg-fond text-slate-800 antialiased;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    /* Focus clavier visible (§22). */
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-primaire-600;
+    }
+
+    input[type='number']::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+    }
+}
+
+/* Zones tactiles ≥ 44×44 px (§11.1, §22). */
+@utility btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primaire {
+    @apply btn bg-primaire-700 text-white shadow-sm hover:bg-primaire-800 active:bg-primaire-900;
+}
+@utility btn-secondaire {
+    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 active:bg-slate-100;
+}
+@utility btn-danger {
+    @apply btn bg-red-600 text-white shadow-sm hover:bg-red-700;
+}
+@utility btn-or {
+    @apply btn bg-or-400 text-primaire-950 shadow-sm hover:bg-or-500;
+}
+@utility btn-lien {
+    @apply btn min-h-11 px-2 text-primaire-700 hover:bg-primaire-50;
+}
+@utility btn-icone {
+    @apply inline-flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 active:bg-slate-200;
+}
+
+@utility champ {
+    @apply block min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-primaire-600 focus:ring-2 focus:ring-primaire-600/20 focus:outline-none disabled:bg-slate-100 sm:text-sm;
+}
+@utility champ-erreur {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500/20;
+}
+@utility etiquette {
+    @apply mb-1 block text-sm font-medium text-slate-700;
+}
+
+@utility carte {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm;
+}
+
+@utility badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ring-1 ring-inset;
+}
+
+@utility tableau {
+    @apply min-w-full divide-y divide-slate-200 text-sm;
+}
+@layer components {
+    .tableau thead th {
+        @apply bg-slate-50 px-4 py-3 text-left text-xs font-semibold tracking-wide text-slate-500 uppercase;
+    }
+    .tableau tbody td {
+        @apply px-4 py-3 align-middle;
+    }
+    .tableau tbody tr {
+        @apply hover:bg-primaire-50/40;
+    }
+}
+
+@utility nav-lien {
+    @apply flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-primaire-100 hover:bg-white/10 hover:text-white;
+}
+@utility nav-lien-actif {
+    @apply bg-white/15 text-white;
+}
+
+@keyframes chargement {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(300%);
+    }
+}
+
+/* Impression des aperçus de rapport. */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: white;
+    }
+}
