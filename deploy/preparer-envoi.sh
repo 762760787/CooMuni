@@ -31,7 +31,10 @@ tar -czf "$SORTIE/coop-code-$HORODATAGE.tar.gz" \
 echo "3/3 Export de la base « $BASE »…"
 "$MYSQLDUMP" -uroot --single-transaction --routines --no-tablespaces --default-character-set=utf8mb4 \
     --ignore-table="$BASE.sessions" --ignore-table="$BASE.cache" --ignore-table="$BASE.cache_locks" \
-    "$BASE" | gzip > "$SORTIE/coop-base-$HORODATAGE.sql.gz"
+    "$BASE" > "$SORTIE/coop-base-$HORODATAGE.sql"
+# Tables techniques : structure seule (sans contenu), pour que la base importée soit complète.
+"$MYSQLDUMP" -uroot --no-data --no-tablespaces --default-character-set=utf8mb4     "$BASE" sessions cache cache_locks >> "$SORTIE/coop-base-$HORODATAGE.sql"
+gzip -f "$SORTIE/coop-base-$HORODATAGE.sql"
 
 echo
 echo "Fichiers prêts dans $SORTIE :"
