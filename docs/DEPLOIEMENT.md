@@ -34,7 +34,7 @@ sudo nginx -v || apache2 -v
 ls /var/www/
 ```
 
-- **PHP 8.3 ou plus** avec les extensions `mysql, mbstring, xml, gd, intl, zip, bcmath, curl`. Si le serveur est en PHP 8.1 ou 8.2 pour les autres applications, **installez PHP 8.3 à côté** (`php8.3-fpm`) : chaque application garde sa propre version.
+- **PHP 8.3 ou plus** avec les extensions `mysql, mbstring, xml, gd, intl, zip, bcmath, curl`. Plusieurs versions peuvent coexister (VPS de la mairie : PHP 8.2 par défaut et **PHP 8.4**) : les scripts choisissent automatiquement `php8.4` (ou `php8.3`) sans changer le `php` par défaut, et chaque site Nginx garde son propre PHP-FPM. Les autres applications ne sont pas touchées.
 - **Composer 2**, **MySQL / MariaDB**, **certbot** (HTTPS Let's Encrypt).
 
 ## 1. DNS
@@ -75,7 +75,7 @@ Si l'administrateur MySQL a un mot de passe (et non l'accès par `sudo mysql`) :
 cd /var/www/coop && sudo MYSQL_CMD="mysql -uroot -p" bash deploy/installer-serveur.sh /tmp/coop-base.sql.gz
 ```
 
-Le script crée la base et son utilisateur (mot de passe aléatoire écrit dans `/var/www/coop/.env`), importe les données, génère la clé de l'application, règle les droits et les caches, puis **affiche de nouveaux mots de passe temporaires** pour `admin`, `tresorier` et `verificateur` : notez-les, ils ne seront plus affichés (sinon : `sudo php8.3 artisan coop:nouveaux-mots-de-passe`).
+Le script crée la base et son utilisateur (mot de passe aléatoire écrit dans `/var/www/coop/.env`), importe les données, génère la clé de l'application, règle les droits et les caches, puis **affiche de nouveaux mots de passe temporaires** pour `admin`, `tresorier` et `verificateur` : notez-les, ils ne seront plus affichés (sinon : `sudo php8.4 artisan coop:nouveaux-mots-de-passe`).
 
 ## 4. Brancher le site web
 
@@ -119,7 +119,7 @@ Seulement si le test répond « Syntax OK » :
 sudo systemctl reload apache2
 ```
 
-Vérifiez dans le fichier que la ligne `php8.3-fpm.sock` correspond à la version présente dans `/run/php/`.
+Le script d'installation a déjà ajusté la ligne `php8.4-fpm.sock` à la version de PHP utilisée.
 
 ## 5. HTTPS
 
@@ -138,7 +138,7 @@ sudo crontab -u www-data -e
 Ajoutez la ligne :
 
 ```
-* * * * * cd /var/www/coop && php8.3 artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/coop && php8.4 artisan schedule:run >> /dev/null 2>&1
 ```
 
 ## 7. Vérifications finales
@@ -149,7 +149,7 @@ Ajoutez la ligne :
 - Tester la sauvegarde :
 
   ```bash
-  sudo -u www-data php8.3 /var/www/coop/artisan coop:sauvegarde
+  sudo -u www-data php8.4 /var/www/coop/artisan coop:sauvegarde
   ```
 
 - Supprimer l'export de données envoyé :

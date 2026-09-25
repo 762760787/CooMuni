@@ -30,19 +30,24 @@ CIBLE=${CIBLE:-/var/www/coop}
 BASE=${BASE:-coop_ngoundiane}
 UTIL_BD=${UTIL_BD:-coop_ngoundiane}
 WEB_USER=${WEB_USER:-www-data}
-PHP=${PHP:-php8.3}
-command -v "$PHP" >/dev/null 2>&1 || PHP=php
+# Version de PHP : la plus récente disponible parmi 8.4 / 8.3 (le « php » par défaut du
+# serveur peut être plus ancien pour les autres applications : on n'y touche pas).
+if [ -z "${PHP:-}" ]; then
+    for v in php8.4 php8.3 php; do command -v "$v" >/dev/null 2>&1 && { PHP=$v; break; }; done
+fi
+# Composer exécuté avec CETTE version de PHP (et non le php par défaut).
+COMPOSER="$PHP $(command -v composer || echo composer)"
 # Commande d'administration MySQL (ex. MYSQL_CMD="mysql -uroot -p" si root a un mot de passe).
 MYSQL_CMD=${MYSQL_CMD:-sudo mysql}
 
-echo "== 1. Vérifications"
+echo "== 1. Vérifications (PHP utilisé : $PHP)"
 "$PHP" -r 'exit(version_compare(PHP_VERSION, "8.3.0", ">=") ? 0 : 1);' \
     || { echo "PHP 8.3 ou plus est requis (trouvé : $("$PHP" -r 'echo PHP_VERSION;')). Voir docs/DEPLOIEMENT.md."; exit 1; }
 MANQUANTES=""
 for ext in pdo_mysql mbstring xml ctype fileinfo gd intl zip bcmath curl openssl tokenizer dom; do
     "$PHP" -m | grep -qi "^$ext$" || MANQUANTES="$MANQUANTES $ext"
 done
-[ -z "$MANQUANTES" ] || { echo "Extensions PHP manquantes :$MANQUANTES (ex. sudo apt install php8.3-{mysql,mbstring,xml,gd,intl,zip,bcmath,curl})"; exit 1; }
+[ -z "$MANQUANTES" ] || { echo "Extensions PHP manquantes :$MANQUANTES (ex. sudo apt install $PHP-{mysql,mbstring,xml,gd,intl,zip,bcmath,curl})"; exit 1; }
 command -v composer >/dev/null || { echo "Composer est requis (https://getcomposer.org/download/)."; exit 1; }
 command -v mysql >/dev/null || { echo "Client MySQL introuvable."; exit 1; }
 $MYSQL_CMD -e "SELECT 1" >/dev/null 2>&1 || { echo "Connexion administrateur MySQL impossible avec « $MYSQL_CMD ». Relancez avec MYSQL_CMD=\"mysql -uroot -p\"."; exit 1; }
@@ -57,8 +62,11 @@ else
     [ -e "$CIBLE/artisan" ] || { echo "Aucun code dans $CIBLE : clonez d'abord le dépôt GitHub (voir docs/DEPLOIEMENT.md)."; exit 1; }
 fi
 cd "$CIBLE"
+# Le site Nginx doit utiliser le PHP-FPM de la même version.
+VERSION=$("$PHP" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+sed -i "s#php[0-9.]*-fpm.sock#php$VERSION-fpm.sock#" deploy/nginx/coop.ngoundiane.sn.conf deploy/apache/coop.ngoundiane.sn.conf
 [ -f public/build/manifest.json ] || { echo "Ressources compilées absentes (public/build) : lancez « npm ci && npm run build » ou utilisez l'archive."; exit 1; }
-COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction
+COMPOSER_ALLOW_SUPERUSER=1 $COMPOSER install --no-dev --optimize-autoloader --no-interaction
 
 echo "== 3. Base de données dédiée « $BASE »"
 MDP_BD=$(openssl rand -base64 24 | tr -d '/+=' | cut -c1-24)

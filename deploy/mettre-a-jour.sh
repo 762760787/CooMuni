@@ -10,8 +10,13 @@ ARCHIVE=${1:-}
 [ -z "$ARCHIVE" ] || ARCHIVE=$(readlink -f "$ARCHIVE")
 CIBLE=${CIBLE:-/var/www/coop}
 WEB_USER=${WEB_USER:-www-data}
-PHP=${PHP:-php8.3}
-command -v "$PHP" >/dev/null 2>&1 || PHP=php
+# Version de PHP : la plus récente disponible parmi 8.4 / 8.3 (le « php » par défaut du
+# serveur peut être plus ancien pour les autres applications : on n'y touche pas).
+if [ -z "${PHP:-}" ]; then
+    for v in php8.4 php8.3 php; do command -v "$v" >/dev/null 2>&1 && { PHP=$v; break; }; done
+fi
+# Composer exécuté avec CETTE version de PHP (et non le php par défaut).
+COMPOSER="$PHP $(command -v composer || echo composer)"
 cd "$CIBLE"
 
 sudo -u "$WEB_USER" "$PHP" artisan down --retry=30 || true
@@ -26,7 +31,7 @@ if [ -n "$ARCHIVE" ]; then
 else
     git -c safe.directory="$CIBLE" pull --ff-only
 fi
-COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction
+COMPOSER_ALLOW_SUPERUSER=1 $COMPOSER install --no-dev --optimize-autoloader --no-interaction
 
 echo "== Migrations et caches"
 "$PHP" artisan migrate --force
